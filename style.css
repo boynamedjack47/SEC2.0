@@ -13,7 +13,8 @@ color: beige;
 
 }
 
-a{
-text-decoration: none;
 
-}
+    a{ color: beige;
+        text-decoration: none;
+        }
+
