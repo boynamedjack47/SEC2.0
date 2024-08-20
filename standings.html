@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="standings.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Standings</title> <a href="index.html"> Home </a>  
+    <title>Standings</title>
+    <a href="index.html"> Home </a>
     <style>
         table {
             width: 100%;
@@ -15,7 +17,7 @@
             text-align: center;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #5192dc;
             cursor: pointer;
         }
     </style>
@@ -25,11 +27,11 @@
     <table id="standingsTable">
         <thead>
             <tr>
-                <th>Team</th>
-                <th>Wins</th>
-                <th>Losses</th>
-                <th>Home</th>
-                <th>Away</th>
+                <th data-column="team">Team</th>
+                <th data-column="wins">Wins</th>
+                <th data-column="losses">Losses</th>
+                <th data-column="home">Home</th>
+                <th data-column="away">Away</th>
             </tr>
         </thead>
         <tbody>
@@ -44,59 +46,79 @@
                 <td>Nebraska</td>
                 <td>9</td>
                 <td>2</td>
+                <td>6-1</td>
+                <td>3-1</td>
             </tr>
             <tr>
                 <td>Penn State</td>
                 <td>9</td>
                 <td>2</td>
+                <td>7-0</td>
+                <td>2-2</td>
             </tr>
             <tr>
                 <td>Georgia</td>
                 <td>10</td>
                 <td>2</td>
+                <td>5-1</td>
+                <td>5-1</td>
             </tr>
             <tr>
                 <td>Texas</td>
                 <td>6</td>
                 <td>5</td>
+                <td>4-2</td>
+                <td>2-3</td>
             </tr>
             <tr>
                 <td>Mississippi State</td>
                 <td>7</td>
                 <td>6</td>
+                <td>3-3</td>
+                <td>4-3</td>
             </tr>
             <tr>
                 <td>Ole Miss</td>
                 <td>6</td>
                 <td>6</td>
+                <td>4-2</td>
+                <td>2-4</td>
             </tr>
             <tr>
                 <td>Tennessee</td>
                 <td>5</td>
                 <td>7</td>
+                <td>3-4</td>
+                <td>2-3</td>
             </tr>
             <tr>
                 <td>North Carolina</td>
                 <td>3</td>
                 <td>9</td>
+                <td>2-5</td>
+                <td>1-4</td>
             </tr>
             <tr>
-                <td>Ohio state</td>
+                <td>Ohio State</td>
                 <td>3</td>
                 <td>9</td>
+                <td>1-6</td>
+                <td>2-3</td>
             </tr>
-           
             <tr>
                 <td>LSU</td>
                 <td>3</td>
                 <td>9</td>
+                <td>2-5</td>
+                <td>1-4</td>
             </tr>
             <tr>
                 <td>Oregon</td>
                 <td>1</td>
                 <td>10</td>
+                <td>1-6</td>
+                <td>0-4</td>
             </tr>
-           
             <!-- Add more rows here -->
         </tbody>
     </table>
@@ -105,25 +127,46 @@
         document.addEventListener("DOMContentLoaded", function() {
             const table = document.getElementById("standingsTable");
             const headers = table.querySelectorAll("th");
-            
-            headers.forEach((header, index) => {
+            let currentSortColumn = null;
+            let sortDirection = 'asc'; // Initialize with ascending order
+
+            headers.forEach(header => {
                 header.addEventListener("click", () => {
-                    sortTable(index);
+                    const column = header.getAttribute("data-column");
+                    if (currentSortColumn === column) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; // Toggle sort direction
+                    } else {
+                        currentSortColumn = column;
+                        sortDirection = 'asc'; // Default to ascending when switching columns
+                    }
+                    sortTable(column, sortDirection);
                 });
             });
 
-            function sortTable(columnIndex) {
+            function sortTable(column, direction) {
                 const rows = Array.from(table.querySelectorAll("tbody tr"));
-                const isNumericColumn = headers[columnIndex].textContent === "Wins" || headers[columnIndex].textContent === "Losses";
-                
-                rows.sort((rowA, rowB) => {
-                    const cellA = rowA.children[columnIndex].textContent.trim();
-                    const cellB = rowB.children[columnIndex].textContent.trim();
-                    
-                    const a = isNumericColumn ? parseInt(cellA) : cellA.toLowerCase();
-                    const b = isNumericColumn ? parseInt(cellB) : cellB.toLowerCase();
+                const columnIndex = Array.from(headers).findIndex(header => header.getAttribute("data-column") === column);
+                const isNumericColumn = column === 'wins' || column === 'losses';
 
-                    return a > b ? 1 : (a < b ? -1 : 0);
+                rows.sort((rowA, rowB) => {
+                    let cellA = rowA.children[columnIndex].textContent.trim();
+                    let cellB = rowB.children[columnIndex].textContent.trim();
+
+                    if (isNumericColumn) {
+                        cellA = parseFloat(cellA); // Use parseFloat for better handling of numeric values
+                        cellB = parseFloat(cellB);
+
+                        // Debugging
+                        console.log(`Comparing ${cellA} and ${cellB} (numeric)`);
+
+                        // Numeric sort
+                        return direction === 'asc' ? cellA - cellB : cellB - cellA;
+                    } else {
+                        // Text sort
+                        console.log(`Comparing "${cellA}" and "${cellB}" (string)`);
+
+                        return direction === 'asc' ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+                    }
                 });
 
                 // Remove existing rows
